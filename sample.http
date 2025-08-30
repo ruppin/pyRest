@@ -1,0 +1,20 @@
+
+###
+GET https://reqres.in/api/users/2
+###
+
+GET https://reqres.in/api/users?page=1
+###
+GET https://reqres.in/api/users/2
+
+#For Star Wars API (SWAPI):
+###
+GET https://swapi.dev/api/people/1/
+
+#For REST Countries:
+###
+GET https://restcountries.com/v3.1/all
+
+###
+GET https://restcountries.com/v3.1/name/canada
+ ###
