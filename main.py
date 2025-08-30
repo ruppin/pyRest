@@ -73,6 +73,16 @@ class RESTCLI:
         return text
 
     def parse_json(self, data):
+        # Support @filename to inject JSON from file
+        if isinstance(data, str) and data.startswith('@'):
+            filename = data[1:]
+            print(filename)
+            try:
+                with open(filename, 'r', encoding='utf-8') as f:
+                    return json.load(f)
+            except Exception as e:
+                print(f"Failed to read JSON from {filename}: {e}")
+                return None
         try:
             return json.loads(data)
         except Exception:
@@ -225,8 +235,10 @@ class RESTCLI:
             return
         endpoint = parts[1] if len(parts) > 1 else ''
         data = None
+        # Support @filename for POST/PUT/PATCH data
         if cmd in ['POST', 'PUT', 'PATCH'] and len(parts) > 2:
-            data = self.parse_json(parts[2])
+            data_arg = parts[2]
+            data = self.parse_json(data_arg)
         resp = None
         status = None
         try:
@@ -258,6 +270,7 @@ class RESTCLI:
             parts = shlex.split(cmd)
             rest_cmd = parts[0].upper()
             endpoint = parts[1] if len(parts) > 1 else ''
+            # Support @filename for POST/PUT/PATCH data
             data = self.parse_json(parts[2]) if len(parts) > 2 else None
             resp = None
             if rest_cmd == 'GET':
@@ -280,6 +293,7 @@ class RESTCLI:
             parts = shlex.split(cmd)
             rest_cmd = parts[0].upper()
             endpoint = parts[1] if len(parts) > 1 else ''
+            # Support @filename for POST/PUT/PATCH data
             data = self.parse_json(parts[2]) if len(parts) > 2 else None
             resp = None
             if rest_cmd == 'GET':

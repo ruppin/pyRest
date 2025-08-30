@@ -1,6 +1,11 @@
 
 ###
-GET https://reqres.in/api/users/2
+POST https://reqres.in/api/users
+
+{
+    "name": "morpheus",
+    "job": "leader"
+}
 ###
 
 GET https://reqres.in/api/users?page=1
@@ -17,4 +22,9 @@ GET https://restcountries.com/v3.1/all
 
 ###
 GET https://restcountries.com/v3.1/name/canada
- ###
+###
+
+POST https://httpbin.org/post
+
+{ "message": "This is a test post call."}
+###
