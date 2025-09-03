@@ -33,31 +33,76 @@ class RESTCLI:
         variables = {}
         aliases = {}
         parser = configparser.ConfigParser()
+
+        # Step 1: Check for [source] section in main config
         if os.path.exists(config_file):
             parser.read(config_file)
-            # First, collect variables
+            source_files = []
+            for section in parser.sections():
+                if section.lower() == "source":
+                    for k, v in parser.items(section):
+                        if k == "file":
+                            source_files.append(v)
+        # Step 2: Load each source file first
+            for src_file in source_files:
+                src_file_path = os.path.expanduser(src_file)
+                if os.path.exists(src_file_path):
+                    src_parser = configparser.ConfigParser()
+                    src_parser.read(src_file_path)
+                    # Load variables from source
+                    for section in src_parser.sections():
+                        if section.lower() == "variables":
+                            for k, v in src_parser.items(section):
+                                variables[k] = v
+                    # Load aliases from source
+                    for section in src_parser.sections():
+                        if section.lower() == "aliases":
+                            for k, v in src_parser.items(section):
+                                for var_k, var_v in variables.items():
+                                    v = v.replace(f"${var_k}", str(var_v))
+                                aliases[k] = v
+                    # Load endpoint configs from source
+                    for section in src_parser.sections():
+                        if section.lower() not in ["variables", "aliases", "source"]:
+                            base_url = src_parser.get(section, 'base_url', fallback='')
+                            headers = src_parser.get(section, 'headers', fallback='{}')
+                            timeout = src_parser.get(section, 'timeout', fallback='10')
+                            cert = src_parser.get(section, 'cert', fallback=None)
+                            key = src_parser.get(section, 'key', fallback=None)
+                            for var_k, var_v in variables.items():
+                                base_url = base_url.replace(f"${var_k}", str(var_v))
+                                headers = headers.replace(f"${var_k}", str(var_v))
+                                timeout = timeout.replace(f"${var_k}", str(var_v))
+                                if cert:
+                                    cert = cert.replace(f"${var_k}", str(var_v))
+                                if key:
+                                    key = key.replace(f"${var_k}", str(var_v))
+                            configs[section] = {
+                                'base_url': base_url,
+                                'headers': json.loads(headers),
+                                'timeout': int(timeout),
+                                'cert': cert,
+                                'key': key
+                            }
+        # Step 3: Now load main config (overrides source)
+        # (parser already read above)
             for section in parser.sections():
                 if section.lower() == "variables":
                     for k, v in parser.items(section):
                         variables[k] = v
-            # Now, process all sections with variable substitution
-            for section in parser.sections():
-                if section.lower() == "variables":
-                    continue
                 elif section.lower() == "aliases":
                     for k, v in parser.items(section):
-                        # Substitute variables in alias value
                         for var_k, var_v in variables.items():
                             v = v.replace(f"${var_k}", str(var_v))
                         aliases[k] = v
+                elif section.lower() == "source":
+                    continue
                 else:
-                    # Substitute variables in each config value
                     base_url = parser.get(section, 'base_url', fallback='')
                     headers = parser.get(section, 'headers', fallback='{}')
                     timeout = parser.get(section, 'timeout', fallback='10')
                     cert = parser.get(section, 'cert', fallback=None)
                     key = parser.get(section, 'key', fallback=None)
-                    # Substitute variables
                     for var_k, var_v in variables.items():
                         base_url = base_url.replace(f"${var_k}", str(var_v))
                         headers = headers.replace(f"${var_k}", str(var_v))
