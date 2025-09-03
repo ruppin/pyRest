@@ -35,23 +35,44 @@ class RESTCLI:
         parser = configparser.ConfigParser()
         if os.path.exists(config_file):
             parser.read(config_file)
+            # First, collect variables
             for section in parser.sections():
                 if section.lower() == "variables":
                     for k, v in parser.items(section):
                         variables[k] = v
+            # Now, process all sections with variable substitution
+            for section in parser.sections():
+                if section.lower() == "variables":
+                    continue
                 elif section.lower() == "aliases":
                     for k, v in parser.items(section):
+                        # Substitute variables in alias value
+                        for var_k, var_v in variables.items():
+                            v = v.replace(f"${var_k}", str(var_v))
                         aliases[k] = v
                 else:
+                    # Substitute variables in each config value
+                    base_url = parser.get(section, 'base_url', fallback='')
+                    headers = parser.get(section, 'headers', fallback='{}')
+                    timeout = parser.get(section, 'timeout', fallback='10')
+                    cert = parser.get(section, 'cert', fallback=None)
+                    key = parser.get(section, 'key', fallback=None)
+                    # Substitute variables
+                    for var_k, var_v in variables.items():
+                        base_url = base_url.replace(f"${var_k}", str(var_v))
+                        headers = headers.replace(f"${var_k}", str(var_v))
+                        timeout = timeout.replace(f"${var_k}", str(var_v))
+                        if cert:
+                            cert = cert.replace(f"${var_k}", str(var_v))
+                        if key:
+                            key = key.replace(f"${var_k}", str(var_v))
                     configs[section] = {
-                        'base_url': parser.get(section, 'base_url', fallback=''),
-                        'headers': json.loads(parser.get(section, 'headers', fallback='{}')),
-                        'timeout': parser.getint(section, 'timeout', fallback=10),
-                        'cert': parser.get(section, 'cert', fallback=None),
-                        'key': parser.get(section, 'key', fallback=None)
+                        'base_url': base_url,
+                        'headers': json.loads(headers),
+                        'timeout': int(timeout),
+                        'cert': cert,
+                        'key': key
                     }
-        #print(configs)
-        #print (aliases)
         self.variables = variables
         self.aliases = aliases
         return configs
