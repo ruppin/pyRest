@@ -275,12 +275,12 @@ class RESTCLI:
                     # handle Show config 
                     if cmd_line.startswith('show config'):
                         parts = cmd_line.split()
-                    if len(parts) > 2:
-                        section = parts[2]
-                    else:
-                        section = self.current_endpoint  # or self.current_conn
-                    self.show_section(section)
-                    continue
+                        if len(parts) > 2:
+                            endpoint = parts[2]
+                        else:
+                            endpoint = self.current_endpoint  # or self.current_conn
+                        self.show_endpoint(endpoint)
+                        continue
                     # Handle piping and redirection
                     if '|' in cmd_line or '>' in cmd_line:
                         if dry_run:
@@ -429,15 +429,15 @@ dry COMMAND               # Show what would be executed
             print(f"Data: {json.dumps(data, indent=2, ensure_ascii=False)}")
         print("================")
 
-    def show_section(self, section_name=None):
-        if section_name is None:
-            section_name = self.current_section  # or self.current_conn
-        section = self.configs.get(section_name)
-        if not section:
-            print(f"No config found for section '{section_name}'")
+    def show_endpoint(self, endpoint_name=None):
+        if endpoint_name is None:
+            endpoint_name = self.current_endpoint  # or self.current_conn
+        endpoint = self.configs.get(endpoint_name)
+        if not endpoint:
+            print(f"No config found for endpoint '{endpoint_name}'")
             return
-        print(f"Config for section [{section_name}]:")
-        for k, v in section.items():
+        print(f"Config for endpoint [{endpoint_name}]:")
+        for k, v in endpoint.items():
             print(f"  {k} = {v}")
 
 if __name__ == '__main__':
