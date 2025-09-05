@@ -3,11 +3,12 @@ class RestClient:
         self.config = config
 
     def _get_cert(self):
-        # Safely get cert and key if present, else return None
         cert = getattr(self.config, 'cert', None)
         key = getattr(self.config, 'key', None)
         if cert and key:
             return (cert, key)
+        elif cert or key:
+            print("Warning: Both cert and key should be provided for client authentication.")
         return None
 
     def get(self, endpoint, params=None):
@@ -33,6 +34,7 @@ class RestClient:
         else:
             url = f"{self.config.base_url.rstrip('/')}/{endpoint.lstrip('/')}"
         cert = self._get_cert()
+        print (f"Using cert: {cert}")
         try:
             response = requests.post(url, headers=self.config.headers, json=data, timeout=self.config.timeout, cert=cert)
             response.raise_for_status()
