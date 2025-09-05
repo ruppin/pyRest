@@ -130,6 +130,8 @@ class RESTCLI:
             config.base_url = cfg['base_url']
             config.headers = cfg['headers']
             config.timeout = cfg['timeout']
+            config.cert = cfg.get('cert')  # Add this line
+            config.key = cfg.get('key')    # Add this line
             self.rest_client = RestClient(config)
             self.current_endpoint = endpoint
 
