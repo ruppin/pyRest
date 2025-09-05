@@ -419,6 +419,17 @@ dry COMMAND               # Show what would be executed
             print(f"Data: {json.dumps(data, indent=2, ensure_ascii=False)}")
         print("================")
 
+    def show_section(self, section_name=None):
+        if section_name is None:
+            section_name = self.current_section  # or self.current_conn
+        section = self.configs.get(section_name)
+        if not section:
+            print(f"No config found for section '{section_name}'")
+            return
+        print(f"Config for section [{section_name}]:")
+        for k, v in section.items():
+            print(f"  {k} = {v}")
+
 if __name__ == '__main__':
     cli = RESTCLI()
     cli.run()
