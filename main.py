@@ -278,7 +278,7 @@ class RESTCLI:
                     if len(parts) > 2:
                         section = parts[2]
                     else:
-                        section = self.current_section  # or self.current_conn
+                        section = self.current_endpoint  # or self.current_conn
                     self.show_section(section)
                     continue
                     # Handle piping and redirection
@@ -397,7 +397,7 @@ dry COMMAND               # Show what would be executed
   alias name = command      # Define alias
   use endpoint_name         # Switch endpoint
   show endpoints            # List configured endpoints
-  show config [section]     # Show config for section (or current)
+  show config [endpoint]     # Show config for section (or current)
   show vars                 # List session variables
   exit, quit                # Exit shell
   help                      # Show this help
